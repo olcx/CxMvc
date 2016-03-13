@@ -1,0 +1,15 @@
+<Files .*>
+        Order Deny,Allow
+        Deny From All
+</Files>
+Options FollowSymLinks
+RewriteEngine On
+#RewriteBase /
+RewriteRule ^(?:includes|sql)\b.* index.php/$0 [L]
+RewriteCond ${REQUEST_URI} ^.+$
+RewriteCond %{REQUEST_FILENAME} \.(gif|jpe?g|png|js|css|swf|php|ico|txt|pdf|xml|htm?)$ [OR]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d [OR]
+RewriteCond %{REQUEST_FILENAME} -l
+RewriteRule ^ - [L]
+RewriteRule (.*) index.php/$1 [PT]
