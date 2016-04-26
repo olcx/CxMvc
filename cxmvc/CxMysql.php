@@ -7,15 +7,28 @@
  * Date: 13-9-15
  */
 
-class CxMysql extends CxTable{
+class CxMysql {
 
 	//数据表主键
 	protected $id;
 
-	public function __construct($tableName=null,$id='id',$server = array()) {
+	/**
+	 * CxPdo对象
+	 * @var CxPdo
+	 */
+	protected $db = null;
+
+	/**
+	 * CxTable对象
+	 * @var CxTable
+	 */
+	public $tbl = null;
+
+	public function __construct($tableName=null,$id='id',$server = 'db') {
 		$this->tableName = ($tableName==null?lcfirst(substr(get_called_class(), 0,-3)):$tableName);
-		$this->db = self::pdo($server);
-		$this->id = $id;
+		$this->db  = self::pdo($server);
+		$this->id  = $id;
+		$this->tbl = new CxTable($this->db, $this->tblName);
 	}
 
 	/**
@@ -63,26 +76,17 @@ class CxMysql extends CxTable{
 	 * 根据参数$option初始化PDO
 	 * @var CxPdo
 	 */
-	public static function pdo($option = NULL){
-		if(!$option){
-			$option = array(
-				'DB_DRIVER'		=> DB_DRIVER,
-				'DB_HOST' 		=> DB_HOST,
-				'DB_PORT' 		=> DB_PORT,
-				'DB_NAME' 		=> DB_NAME,
-				'DB_USER' 		=> DB_USER,
-				'DB_PASS' 		=> DB_PASS,
-				'DB_CONNECT' 	=> DB_CONNECT,
-				'DB_CHARSET' 	=> DB_CHARSET,
-			);
+	public static function pdo($option){
+		if(is_string($option)) {
+			$option = c($option);
 		}
-		$dsn = "{$option['DB_DRIVER']}:host={$option['DB_HOST']};port={$option['DB_PORT']};dbname={$option['DB_NAME']}";
+		$dsn = "{$option['driver']}:host={$option['host']};port={$option['port']};dbname={$option['name']}";
 		$options = array(
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-			PDO::ATTR_PERSISTENT => $option['DB_CONNECT'],#pdo默认为false
-			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.$option['DB_CHARSET']
+			PDO::ATTR_PERSISTENT => $option['connect'],#pdo默认为false
+			PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.$option['charset']
 		);
-		return CxPdo::getObject($dsn, $option['DB_USER'], $option['DB_PASS'], $options);
+		return CxPdo::getObject($dsn, $option['user'], $option['pass'], $options);
 	}
 	
 	/**
@@ -96,7 +100,7 @@ class CxMysql extends CxTable{
 	 * 获取数据时间
 	 */
 	public function getNowTime(){
-		return $this->sql("select now() as time")->fetchColumn();
+		return $this->tbl->sql("select now() as time")->fetchColumn();
 	}
 	
 	/**
@@ -106,7 +110,7 @@ class CxMysql extends CxTable{
 	 */
 	public function add($arr,$filter=false) {
 		if($filter) $arr = array_filter($arr);
-		return $this->insert($arr);
+		return $this->tbl->insert($arr);
 	}
 	
 	/**
@@ -115,7 +119,7 @@ class CxMysql extends CxTable{
 	 * @param unknown $fieldNames
 	 */
 	public function adds($arr, $fieldNames=array()) {
-		return $this->batchInsert($arr,$fieldNames);
+		return $this->tbl->batchInsert($arr,$fieldNames);
 	}
 	
 	/**
@@ -124,7 +128,7 @@ class CxMysql extends CxTable{
 	 * @param string $upstr 要执行的修改语句
 	 */
 	public function addOrUpdate($arr,$upstr = null){
-		return $this->insertOrUpdate($arr,$upstr);
+		return $this->tbl->insertOrUpdate($arr,$upstr);
 	}
 	
 	/**
@@ -134,7 +138,7 @@ class CxMysql extends CxTable{
 	 */
 	public function updateId($id, $arr, $filter=false) {
 		if($filter) $arr = array_filter($arr);
-		return $this->update($arr, array("{$this->id}=?", array($id)));
+		return $this->tbl->update($arr, array("{$this->id}=?", array($id)));
 	}
 
 	/**
@@ -142,7 +146,7 @@ class CxMysql extends CxTable{
 	 * @param string&int $id
 	 */
 	public function deleteId($id) {
-		return $this->delete("{$this->id}=?", $id);
+		return $this->tbl->delete("{$this->id}=?", $id);
 	}
 
 	/**
@@ -154,9 +158,7 @@ class CxMysql extends CxTable{
 	 */
 	public function findId($id, $fields = '', $fetchMode=PDO::FETCH_ASSOC) {
 		if (!empty($fields)) $this->setField($fields);
-		$this->where($this->tableName.'.'.$this->id.'=?', $id);
-		$result = $this->fetch(NULL, $fetchMode);
-		return $result;
+		return $this->tbl->where($this->tableName.'.'.$this->id.'=?', $id)->fetch(NULL, $fetchMode);
 	}
 
 	/**
@@ -166,8 +168,7 @@ class CxMysql extends CxTable{
 	 */
 	public function findIdColumn($id, $column) {
 		if (!empty($column)) $this->setField($column);
-		$this->where($this->tableName.'.'.$this->id.'=?', array($id));
-		return $this->fetchColumn();
+		return $this->tbl->where($this->tableName.'.'.$this->id.'=?', array($id))->fetchColumn();
 	}
 
 	/**
@@ -178,7 +179,7 @@ class CxMysql extends CxTable{
 	 */
 	public function findColumn($condition, $params, $fields) {
 		if (!empty($fields)) $this->field($fields);
-		return $this->where($condition, $params)->fetchColumn();
+		return $this->tbl->where($condition, $params)->fetchColumn();
 	}
 
 	/**
@@ -197,7 +198,7 @@ class CxMysql extends CxTable{
 			$where = $condition;
 			$params = null;
 		}
-		return $this->field($fields)->where($where, $params)->orderby($order)->limit($rows, $start)->fetchAllUnique();
+		return $this->tbl->field($fields)->where($where, $params)->orderby($order)->limit($rows, $start)->fetchAllUnique();
 	}
 
 	
@@ -210,7 +211,7 @@ class CxMysql extends CxTable{
 	 */
 	public function find($condition, $params = NULL, $fields='', $fetchMode=PDO::FETCH_ASSOC) {
 		if (!empty($fields)) $this->field($fields);
-		return $this->where($condition, $params)->fetch(NULL, $fetchMode);
+		return $this->tbl->where($condition, $params)->fetch(NULL, $fetchMode);
 	}
 	
 
@@ -233,7 +234,7 @@ class CxMysql extends CxTable{
 			$where = $condition;
 			$params = null;
 		}
-		return $this->field($fields)->where($where, $params)->orderby($order)->limit($rows, $start)->fetchAll(NULL, $fetchMode);
+		return $this->tbl->field($fields)->where($where, $params)->orderby($order)->limit($rows, $start)->fetchAll(NULL, $fetchMode);
 	}
 	
 	/**
@@ -248,7 +249,7 @@ class CxMysql extends CxTable{
 	 */
 	public function findsPage($condition = '', $rows = 0, $start = 0, $order='', $fields = '*', $fetchMode=PDO::FETCH_ASSOC) {
 		$result = $this->finds($condition, $rows, $start, $order, 'SQL_CALC_FOUND_ROWS '.$fields, $fetchMode);
-		$num = $this->sql('SELECT FOUND_ROWS()')->fetchColumn();
+		$num = $this->tbl->sql('SELECT FOUND_ROWS()')->fetchColumn();
 		return array('n'=>$num,'s'=>$result);
 	}
 	
@@ -262,9 +263,9 @@ class CxMysql extends CxTable{
 	 */
 	public function count($condition = '', $params = null, $distinct=false) {
 		if (!empty($condition)) {
-			$this->where($condition, $params);
+			$this->tbl->where($condition, $params);
 		}
-		return $this->recordsCount($distinct);
+		return $this->tbl->recordsCount($distinct);
 	}
 
 	/**
@@ -275,7 +276,7 @@ class CxMysql extends CxTable{
 	 */
 	public function exists($condition='', $params=null) {
 		if (!is_array($params)) $params = array($params);
-		$cnt = $this->field('count(*)')->where($condition, $params)->fetchColumn();
+		$cnt = $this->tbl->field('count(*)')->where($condition, $params)->fetchColumn();
 		return $cnt > 0 ? true : false;
 	}
 
@@ -288,13 +289,13 @@ class CxMysql extends CxTable{
 	 */
 	public function existsRow($condition='', $params=null, $fields=null) {
 		if (!empty($fields)) $this->field($fields);
-		$row = $this->where($condition, $params)->fetch(NULL, PDO::FETCH_ASSOC);
+		$row = $this->tbl->where($condition, $params)->fetch(NULL, PDO::FETCH_ASSOC);
 		$exists = empty($row) ? false : true;
 		return array($exists, $row);
 	}
 	
 	public function maxId() {
-		return $this->field($this->id)->orderby('`'.$this->id.'` DESC')->fetchColumn();
+		return $this->tbl->field($this->id)->orderby('`'.$this->id.'` DESC')->fetchColumn();
 	}
 
 	
@@ -309,7 +310,7 @@ class CxMysql extends CxTable{
 		$foreignKey = $foreignKey ? $foreignKey : $this->id;
 		$joinType = $joinType.' JOIN';
 		
-		$this->join("`$tblName` $tblAlias", "`$this->tblName`.$foreignKey =`$tblAlias`.".$this->id, $fields, $joinType);
+		$this->tbl->join("`$tblName` $tblAlias", "`$this->tblName`.$foreignKey =`$tblAlias`.".$this->id, $fields, $joinType);
 
 		return $this;
 	}
@@ -324,7 +325,7 @@ class CxMysql extends CxTable{
 	 */
 	public function has($table,  $on, $fields='', $joinType='left'){
 		$joinType = $joinType.' JOIN';	
-		$this->join($table, $on, $fields, $joinType);
+		$this->tbl->join($table, $on, $fields, $joinType);
 		return $this;
 	}
 	
@@ -350,7 +351,7 @@ class CxMysql extends CxTable{
 	 * 获取运行的SQL语句
 	 */
 	public function lastSql() {
-		return $this->sql();
+		return $this->tbl->sql();
 	}
 
 	
@@ -380,13 +381,13 @@ class CxTable {
 	/**
 	 * @var CxPdo
 	 */
-	protected $db;
+	private $db;
 
 	/** @var String  table name */
-	protected $tableName = '';
+	private $tableName = '';
 
 	/** @var String  current table's alias, default is table name without prefix */
-	protected $tableAlias = '';
+	private $tableAlias = '';
 
 	/** @var String  fields part of the select clause, default is '*' */
 	private $fields = '*';

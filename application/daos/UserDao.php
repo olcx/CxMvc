@@ -1,7 +1,9 @@
 <?php
-class UserDao extends CxDao{
+class UserDao extends Rmcache{
 
     public function query(){
-
+        $this->get('cmm',234,function(){
+            $this->finds();
+        });
     }
 }
