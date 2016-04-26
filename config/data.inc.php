@@ -5,13 +5,19 @@
  * Date: 16/4/26
  * Time: 下午10:10
  */
-$config['db'] = array(
-    'driver'	=> DB_DRIVER,
-    'host' 		=> DB_HOST,
-    'port' 		=> DB_PORT,
-    'dbname' 	=> DB_NAME,
-    'user' 		=> DB_USER,
-    'pass' 		=> DB_PASS,
-    'connect' 	=> DB_CONNECT,
-    'charset' 	=> DB_CHARSET,
+$config['mysql'] = array(
+    'driver'	=> 'mysql',
+    'host' 		=> '127.0.0.1',
+    'port' 		=> 3306,
+    'dbname' 	=> 'test',
+    'user' 		=> 'root',
+    'pass' 		=> 'root',
+    'connect' 	=> false,
+    'charset' 	=> 'UTF8',
+);
+
+$config['redis'] = array(
+    'host' 		=> '127.0.0.1',
+    'port' 		=> 6200,
+    'db' 	=> '2',
 );

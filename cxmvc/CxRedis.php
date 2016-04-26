@@ -17,31 +17,38 @@ class CxRedis extends Redis {
         if (!$this->connect($host, $port)) {
             throw new Exception("cannot connect to Redis server {$host}:{$port}");
         }
+        $this->select($db);
     }
 
     /**
+     * 通过一个配置数组,获取一个redis实例
      * @var CxRedis
      * @param string $server
      * @return CxRedis
      */
-    public static function getInstance($server = NULL) {
-        if ($server == NULL) {
-            $server = array(
-                'REDIS_HOST' => REDIS_HOST,
-                'REDIS_PORT' => REDIS_PORT
-            );
+    public static function getInstance($server = 'redis') {
+        if(is_string($server)) {
+            $server = c($server);
         }
-        $key = $server['REDIS_HOST'] . $server['REDIS_PORT'];
+        $key = $server['host'] . $server['port'].$server['db'];
         if (!isset(self::$_redis[$key])) {
-            self::$_redis[$key] = new CxRedis($server['REDIS_HOST'], $server['REDIS_PORT']);
+            self::$_redis[$key] = new CxRedis($server['host'], $server['port'], $server['db']);
         }
         return self::$_redis[$key];
     }
 
+    /**
+     * 通过指定的host,port及可选的db,获取一个redis实例
+     * @param $host
+     * @param $port
+     * @param int $db
+     * @return CxRedis
+     */
     public function getInstances($host, $port, $db = 0) {
         $server = array(
-            'REDIS_HOST' => REDIS_HOST,
-            'REDIS_PORT' => REDIS_PORT
+            'host' => $host,
+            'port' => $port,
+            'db'   => $db
         );
         return self::getInstance($server);
     }

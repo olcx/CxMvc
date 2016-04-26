@@ -24,7 +24,7 @@ class CxMysql {
 	 */
 	public $tbl = null;
 
-	public function __construct($tableName=null,$id='id',$server = 'db') {
+	public function __construct($tableName=null,$id='id',$server = 'mysql') {
 		$this->tableName = ($tableName==null?lcfirst(substr(get_called_class(), 0,-3)):$tableName);
 		$this->db  = self::pdo($server);
 		$this->id  = $id;

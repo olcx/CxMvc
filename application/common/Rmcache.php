@@ -14,6 +14,11 @@ class Rmcache extends CxMysql {
 
     protected $enable;
 
+    public function __construct($tableName, $id, $mysql='mysql',$redis='redis') {
+        parent::__construct($tableName, $id, $mysql);
+        $this->redis = CxRedis::getInstance($redis);
+    }
+
     /**
      * 添加数据到redis
      * @param $key
@@ -25,21 +30,6 @@ class Rmcache extends CxMysql {
         if(is_object($content)){
             $content = call_user_func($content,$key);
         }
-        return $this->redis->set($key,$content,$timeout);
-    }
-
-    /**
-     * 将数据添加到redis之前,先转化为json
-     * @param $key
-     * @param null $content
-     * @param int $timeout
-     * @return bool
-     */
-    public function setJson($key,$content=null,$timeout=0) {
-        if(is_object($content)){
-            $content = call_user_func($content,$key);
-        }
-        $content = json_encode($content);
         return $this->redis->set($key,$content,$timeout);
     }
 
@@ -67,21 +57,6 @@ class Rmcache extends CxMysql {
         return $content;
     }
 
-    /**
-     * 同get方法类似,只是会对返回值先进行json_decode
-     * @param $key
-     * @param int $timeout
-     * @param null $content
-     * @return mixed
-     */
-    public function getJson($key,$content=null,$timeout=0) {
-        $result = $this->redis->get($key);
-        if($result === null) {
-            return json_decode($result);
-        }
-        $this->setJson($key,$content,$timeout);
-        return $content;
-    }
 
     public function hget($key,$timeout=0,$content=null) {
         //$this->redis->hset()
