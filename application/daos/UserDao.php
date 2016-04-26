@@ -2,8 +2,8 @@
 class UserDao extends Rmcache{
 
     public function query(){
-        $this->get('cmm',234,function(){
+        $this->get('cmm',function(){
             $this->finds();
-        });
+        },234);
     }
 }
