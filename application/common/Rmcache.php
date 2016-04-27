@@ -68,16 +68,4 @@ class Rmcache extends CxMysql {
         return $content;
     }
 
-    public function hgetJson($key,$timeout=0,$content=null) {
-
-        return $content;
-    }
-
-    public function hsetJson($key,$timeout=0,$content=null) {
-
-        return $content;
-    }
-
-
-
 }
