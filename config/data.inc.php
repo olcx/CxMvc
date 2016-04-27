@@ -6,13 +6,13 @@
  * Time: 下午10:10
  */
 $config['mysql'] = array(
-    'driver'	=> 'mysql',
-    'host' 		=> '127.0.0.1',
+    'driver'	    => 'mysql',
+    'host' 		=> 'localhost',
     'port' 		=> 3306,
-    'dbname' 	=> 'test',
+    'dbname'=> 'test',
     'user' 		=> 'root',
-    'pass' 		=> 'root',
-    'connect' 	=> false,
+    'pass' 		=> '123456',
+    'connect' => false,
     'charset' 	=> 'UTF8',
 );
 

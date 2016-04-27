@@ -24,7 +24,7 @@ define('PATH_CONSOLE',	    PATH.'application'.DS.'console'.DS);//脚本路径
 define('PATH_DAOS',	            PATH.'application'.DS.'daos'.DS);//DAO路径
 define('PATH_TEMPLATES',	    PATH.'application'.DS.'view'.DS);//模版路径
 define('PATH_COMMON',	        PATH.'application'.DS.'common'.DS);//公共模块或插件的路径
-define('PATH_AUTOINCLUDE',      PATH.'application'.DS.'include'.DS);//自动文件加载文件夹
+define('PATH_AUTOINCLUDE',      PATH.'application'.DS.'include'.DS.':'.PATH.DS.'config'.DS);//自动文件加载文件夹,多个目录以‘：’分割
 define('PATH_INI',	            PATH.'temp'.DS);//固态配置文件夹路径
 define('PATH_TEMP',	            PATH.'temp'.DS);//Temp文件夹路径
 define('PATH_LOG',	            PATH.'temp'.DS);//Temp文件夹路径

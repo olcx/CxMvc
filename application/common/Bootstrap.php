@@ -8,9 +8,9 @@
 class Bootstrap {
 
     public function __construct(CxMvc $mvc) {
-        $mvc->notfound(array($this,'onNotfound'));
-        $mvc->error(array($this,'onError'));
-        $mvc->redirect(array($this,'onRedirect'));
+        //$mvc->notfound(array($this,'onNotfound'));
+        //$mvc->error(array($this,'onError'));
+        //$mvc->redirect(array($this,'onRedirect'));
     }
 
     public function onRedirect(CxRouter $router){

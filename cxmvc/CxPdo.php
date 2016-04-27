@@ -14,10 +14,11 @@ class CxPdo extends PDO {
      * @var CxPdo
      * @return CxPdo
      */
-    public static function getObject($dsn, $username, $passwd, $options = null) {
+    public static function getObject($dsn, $user, $pass, $options = null) {
         if (!isset(self::$_pdo[$dsn])) {
-            self::$_pdo[$dsn] = new CxPdo($dsn, $username, $passwd, $options);
+            self::$_pdo[$dsn] = new CxPdo($dsn, $user, $pass, $options);
         }
+
         return self::$_pdo[$dsn];
     }
 

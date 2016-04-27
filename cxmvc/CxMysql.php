@@ -80,7 +80,7 @@ class CxMysql {
 		if(is_string($option)) {
 			$option = c($option);
 		}
-		$dsn = "{$option['driver']}:host={$option['host']};port={$option['port']};dbname={$option['name']}";
+		$dsn = "{$option['driver']}:host={$option['host']};port={$option['port']};dbname={$option['dbname']}";
 		$options = array(
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 			PDO::ATTR_PERSISTENT => $option['connect'],#pdo默认为false
