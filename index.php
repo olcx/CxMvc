@@ -4,7 +4,7 @@
 session_start();
 
 //关闭所有错误警告
-//ini_set("display_errors", 0);
+//ini_set("display_errors", E_ALL);
 
 //加载配置文件
 include ("config.mvc.php");

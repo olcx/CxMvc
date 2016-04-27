@@ -6,18 +6,18 @@
  * Time: 下午10:10
  */
 $config['mysql'] = array(
-    'driver'	    => 'mysql',
+    'driver'	=> 'mysql',
     'host' 		=> 'localhost',
     'port' 		=> 3306,
-    'dbname'=> 'test',
+    'dbname'    => 'cxmvc',
     'user' 		=> 'root',
     'pass' 		=> '123456',
-    'connect' => false,
+    'connect'   => true,
     'charset' 	=> 'UTF8',
 );
 
 $config['redis'] = array(
     'host' 		=> '127.0.0.1',
     'port' 		=> 6200,
-    'db' 	=> '2',
+    'db' 	    => '2',
 );

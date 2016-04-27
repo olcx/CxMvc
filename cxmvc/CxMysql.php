@@ -24,11 +24,13 @@ class CxMysql {
 	 */
 	public $tbl = null;
 
+	public $tableName;
+
 	public function __construct($tableName=null,$id='id',$server = 'mysql') {
 		$this->tableName = ($tableName==null?lcfirst(substr(get_called_class(), 0,-3)):$tableName);
 		$this->db  = self::pdo($server);
 		$this->id  = $id;
-		$this->tbl = new CxTable($this->db, $this->tblName);
+		$this->tbl = new CxTable($this->db, $this->tableName);
 	}
 
 	/**
@@ -56,7 +58,7 @@ class CxMysql {
 			if(!empty($in)) $sql .= ','; $sql .= $out;
 		}
 		$sql .= ')';
-		$row = $pdo->execute($sql,$in);
+		$row = $pdo->mysql($sql,$in);
 		$data = null;
 		do{
 			$result = $row -> fetchAll();
@@ -157,7 +159,7 @@ class CxMysql {
 	 * @return array
 	 */
 	public function findId($id, $fields = '', $fetchMode=PDO::FETCH_ASSOC) {
-		if (!empty($fields)) $this->setField($fields);
+		if (!empty($fields)) $this->tbl->field($fields);
 		return $this->tbl->where($this->tableName.'.'.$this->id.'=?', $id)->fetch(NULL, $fetchMode);
 	}
 
@@ -167,7 +169,7 @@ class CxMysql {
 	 * @param string $column 列值
 	 */
 	public function findIdColumn($id, $column) {
-		if (!empty($column)) $this->setField($column);
+		if (!empty($column)) $this->tbl->field($column);
 		return $this->tbl->where($this->tableName.'.'.$this->id.'=?', array($id))->fetchColumn();
 	}
 
@@ -178,7 +180,7 @@ class CxMysql {
 	 * @param string $fields
 	 */
 	public function findColumn($condition, $params, $fields) {
-		if (!empty($fields)) $this->field($fields);
+		if (!empty($fields)) $this->tbl->field($fields);
 		return $this->tbl->where($condition, $params)->fetchColumn();
 	}
 
@@ -210,7 +212,7 @@ class CxMysql {
 	 * @param number $fetchMode
 	 */
 	public function find($condition, $params = NULL, $fields='', $fetchMode=PDO::FETCH_ASSOC) {
-		if (!empty($fields)) $this->field($fields);
+		if (!empty($fields)) $this->tbl->field($fields);
 		return $this->tbl->where($condition, $params)->fetch(NULL, $fetchMode);
 	}
 	
@@ -288,7 +290,7 @@ class CxMysql {
 	 * @return multitype:boolean unknown
 	 */
 	public function existsRow($condition='', $params=null, $fields=null) {
-		if (!empty($fields)) $this->field($fields);
+		if (!empty($fields)) $this->tbl->field($fields);
 		$row = $this->tbl->where($condition, $params)->fetch(NULL, PDO::FETCH_ASSOC);
 		$exists = empty($row) ? false : true;
 		return array($exists, $row);
@@ -434,19 +436,17 @@ class CxTable {
 	/** @var String left join */
 	const RIGHT_JOIN = 'RIGHT JOIN';
 
-	/*
 	function __construct($dbObj, $tableName, $tableAlias = '') {
 		$this->db = $dbObj;
 		$this->tableName = $tableName;
 		$this->tableAlias = $tableAlias ? $tableAlias : $tableName;
 	}
-	*/
-/*
+
 	function setTableAlias($tableAlias) {
 		$this->tableAlias = $tableAlias;
 		return $this;
 	}
-*/
+
 	function sql($sql = null, $params = NULL) {
 		if ($sql) {
 			$this->sql = '';

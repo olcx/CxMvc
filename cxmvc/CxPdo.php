@@ -5,7 +5,7 @@
  * User: chenxiong<cloklo@qq.com>
  * Date: 13-9-15
  */
-class CxPdo extends PDO {
+class CxPdo extends PDO{
 
     private static $_pdo = array();
 
@@ -18,7 +18,6 @@ class CxPdo extends PDO {
         if (!isset(self::$_pdo[$dsn])) {
             self::$_pdo[$dsn] = new CxPdo($dsn, $user, $pass, $options);
         }
-
         return self::$_pdo[$dsn];
     }
 
